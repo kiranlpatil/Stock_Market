@@ -1,1 +1,1 @@
-# Stock_Market
+# React Native + NodeJS + MongoDB - Stock_Market App
