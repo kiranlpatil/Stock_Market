@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { StyleSheet, Text, View, TextInput, Dimensions, TouchableOpacity, TouchableWithoutFeedback, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Dimensions, TouchableOpacity, TouchableWithoutFeedback, Alert, Keyboard } from 'react-native';
 import { Icon } from 'react-native-elements';
 
 export default function LoginScreen() {
@@ -29,7 +29,7 @@ export default function LoginScreen() {
     };
 
     return (
-        <TouchableWithoutFeedback>
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={styles.container}>
                 <View style={styles.bigCircle}/>
                 <View style={styles.smallCircle}/>
