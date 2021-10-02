@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {Text, View, Dimensions, StyleSheet, Alert, TouchableOpacity, FlatList, Linking} from 'react-native';
 
-import Carousel, {Pagination} from 'react-native-snap-carousel'; // Version can be specified in package.json
+import Carousel, {Pagination} from 'react-native-snap-carousel';
 import { Fontisto } from '@expo/vector-icons';
 import { Foundation } from '@expo/vector-icons';
 import { SimpleLineIcons } from '@expo/vector-icons';

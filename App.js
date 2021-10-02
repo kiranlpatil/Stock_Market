@@ -17,11 +17,11 @@ const StackNavigator = () => (
       {/*  name="Login Page"*/}
       {/*  component={LoginScreen}*/}
       {/*/>*/}
-      {/*<Stack.Screen*/}
-      {/*  options={{ headerShown: false }}*/}
-      {/*  name="Login Page"*/}
-      {/*  component={VerificationScreen}*/}
-      {/*/>*/}
+      <Stack.Screen
+        options={{ headerShown: false }}
+        name="Verification Page"
+        component={VerificationScreen}
+      />
       <Stack.Screen
           options={{
               headerShown: true,
