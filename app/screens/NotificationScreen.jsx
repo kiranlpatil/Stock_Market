@@ -24,6 +24,7 @@ import {
   Foundation,
   Fontisto,
 } from "@expo/vector-icons";
+import { Caption } from "react-native-paper";
 
 const SLIDER_WIDTH = Dimensions.get("window").width;
 const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.8);
@@ -50,7 +51,7 @@ const SPACING = 20;
 const AVATAR_SIZE = 70;
 const ITEM_SIZE = AVATAR_SIZE + SPACING * 5;
 
-export default function IntradayScreen() {
+export default function NotificationScreen() {
   const [images, imageData] = useState([]);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -79,8 +80,7 @@ export default function IntradayScreen() {
                 flexDirection: "row",
                 padding: SPACING,
                 marginBottom: SPACING,
-                // backgroundColor: rgbaColor(255, 255, 255, 0.8),
-                elevation: 5,
+                backgroundColor: rgbaColor(255, 255, 255, 0.8),
                 borderRadius: 12,
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 10 },
@@ -88,144 +88,24 @@ export default function IntradayScreen() {
                 shadowRadius: 20,
               }}
             >
-              <View>
-                <View style={styles.itemContainer}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "flex-start",
-                      justifyContent: "space-around",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        ...styles.itemLabel,
-                        justifyContent: "flex-start",
-                        borderRadius: 20,
-                        alignSelf: "center",
-                      }}
-                    >{`Sensex High`}</Text>
-                    <TouchableOpacity style={styles.itemLabelButton}>
-                      <Text
-                        style={{
-                          ...styles.itemLabel,
-                          justifyContent: "center",
-                          borderRadius: 20,
-                          fontSize: 17,
-                          alignSelf: "center",
-                          alignContent: "center",
-                          backgroundColor: "green",
-                        }}
-                      >
-                        {"Intraday Item"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: 5,
-                    }}
-                  >
-                    <FlatList
-                      data={[
-                        {
-                          id: "a",
-                          name: "Target 1",
-                          value: 12.22,
-                          isCorrect: true,
-                        },
-                        {
-                          id: "b",
-                          name: "Target 2",
-                          value: 57.98,
-                          isCorrect: false,
-                        },
-                        {
-                          id: "c",
-                          name: "Target 3",
-                          value: 98.42,
-                          isCorrect: true,
-                        },
-                        {
-                          id: "d",
-                          name: "Stop Loss",
-                          value: 23.92,
-                          isCorrect: true,
-                        },
-                      ]}
-                      renderItem={({ item }) => (
-                        <TouchableOpacity
-                          style={{
-                            ...styles.carouselContainerButtons,
-                            padding: 2,
-                            flexDirection: "column",
-                          }}
-                        >
-                          <View
-                            style={{
-                              backgroundColor: "lightgreen",
-                              flex: 1,
-                              justifyContent: "center",
-                              borderRadius: 10,
-                              alignContent: "center",
-                            }}
-                          >
-                            <Text
-                              style={{
-                                padding: 2,
-                                justifyContent: "flex-start",
-                                alignSelf: "center",
-                                fontSize: 13,
-                              }}
-                            >
-                              {item.name}
-                            </Text>
-                            <Text
-                              style={{
-                                padding: 1,
-                                justifyContent: "flex-end",
-                                alignSelf: "center",
-                                fontSize: 12,
-                              }}
-                            >
-                              {item.value}
-                            </Text>
-                            <View
-                              style={{
-                                justifyContent: "flex-end",
-                                padding: 2,
-                                paddingRight: 5,
-                                width: "100%",
-                                alignItems: "flex-end",
-                              }}
-                            >
-                              {item.isCorrect && (
-                                <Ionicons
-                                  name="checkmark-circle-sharp"
-                                  size={15}
-                                  color="green"
-                                />
-                              )}
-                              {!item.isCorrect && (
-                                <Text style={{ fontSize: 12 }} />
-                              )}
-                            </View>
-                          </View>
-                        </TouchableOpacity>
-                      )}
-                      keyExtractor={(item) => item.id}
-                      numColumns={4}
-                    />
-                  </View>
-                  <View style={{ paddingLeft: 12, paddingBottom: 15 }}>
-                    <Text style={{ color: "black" }}>
-                      09:28 Thursday 26, 2021
-                    </Text>
-                  </View>
-                </View>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "flex-start",
+                }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: "800" }}>
+                  {"Buy Hindalco hit by 21"}
+                </Text>
+                <Text
+                  style={{ fontSize: 12, fontWeight: "500", paddingTop: 10 }}
+                >
+                  {"Purchase this at once"}
+                </Text>
+                <Caption style={{ paddingTop: 5 }}>
+                  {"12:00 Thurday 7, 2021"}
+                </Caption>
               </View>
             </Animated.View>
           );
@@ -298,8 +178,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 10.2,
     shadowRadius: 10.41,
-
-    elevation: 2,
   },
   text: {
     color: "#0c0c0c",
