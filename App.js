@@ -11,22 +11,31 @@ import HomeScreen from "./app/screens/HomeScreen";
 import IndicesScreen from "./app/screens/IndicesScreen";
 import AdminScreen from "./app/screens/AdminScreen";
 import NotificationScreen from "./app/screens/NotificationScreen";
+import SplashScreen from "./app/screens/SplashScreen";
+import MarketsScreen from "./app/screens/MarketsScreen";
+import AdCampaign from "./app/screens/AdCampaign";
+import StockChange from "./app/screens/StockChange";
 
 enableScreens();
 
 const Stack = createStackNavigator();
 const StackNavigator = () => (
   <Stack.Navigator screenOptions={{ gestureEnabled: true }}>
-    {/*<Stack.Screen*/}
-    {/*  options={{ headerShown: false }}*/}
-    {/*  name="Login Page"*/}
-    {/*  component={LoginScreen}*/}
-    {/*/>*/}
-    {/* <Stack.Screen
+    <Stack.Screen
+      options={{ headerShown: false }}
+      name="Login Page"
+      component={SplashScreen}
+    />
+    <Stack.Screen
+      options={{ headerShown: false }}
+      name="Login"
+      component={LoginScreen}
+    />
+    <Stack.Screen
       options={{ headerShown: false }}
       name="Verification Page"
       component={VerificationScreen}
-    /> */}
+    />
     <Stack.Screen
       options={{
         headerShown: false,
@@ -44,7 +53,14 @@ const StackNavigator = () => (
     />
     <Stack.Screen
       options={{
-        headerShown: true,
+        headerShown: false,
+      }}
+      name="AdCampaign"
+      component={AdCampaign}
+    />
+    <Stack.Screen
+      options={{
+        headerShown: false,
         headerTitleAlign: "center",
         headerStyle: {
           backgroundColor: "white",
@@ -62,7 +78,7 @@ const StackNavigator = () => (
         headerShown: true,
         headerTitleAlign: "center",
         headerStyle: {
-          backgroundColor: "blue",
+          backgroundColor: "#00BFFF",
         },
         headerTintColor: "#fff",
         headerTitleStyle: {
@@ -77,7 +93,22 @@ const StackNavigator = () => (
         headerShown: true,
         headerTitleAlign: "center",
         headerStyle: {
-          backgroundColor: "blue",
+          backgroundColor: "#00BFFF",
+        },
+        headerTintColor: "#fff",
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+      }}
+      name="Delivery Page"
+      component={IntradayScreen}
+    />
+    <Stack.Screen
+      options={{
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "#00BFFF",
         },
         headerTintColor: "#fff",
         headerTitleStyle: {
@@ -92,7 +123,22 @@ const StackNavigator = () => (
         headerShown: true,
         headerTitleAlign: "center",
         headerStyle: {
-          backgroundColor: "lightblue",
+          backgroundColor: "#00BFFF",
+        },
+        headerTintColor: "#fff",
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+      }}
+      name="Market"
+      component={MarketsScreen}
+    />
+    <Stack.Screen
+      options={{
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "#00BFFF",
         },
         headerTintColor: "#fff",
         headerTitleStyle: {
@@ -107,7 +153,7 @@ const StackNavigator = () => (
         headerShown: true,
         headerTitleAlign: "center",
         headerStyle: {
-          backgroundColor: "lightblue",
+          backgroundColor: "#00BFFF",
         },
         headerTintColor: "#fff",
         headerTitleStyle: {
@@ -122,7 +168,7 @@ const StackNavigator = () => (
         headerShown: true,
         headerTitleAlign: "center",
         headerStyle: {
-          backgroundColor: "blue",
+          backgroundColor: "#00BFFF",
         },
         headerTintColor: "#fff",
         headerTitleStyle: {
@@ -131,6 +177,21 @@ const StackNavigator = () => (
       }}
       name="Notification"
       component={NotificationScreen}
+    />
+    <Stack.Screen
+      options={{
+        headerShown: false,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "#00BFFF",
+        },
+        headerTintColor: "#fff",
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+      }}
+      name="StockChange"
+      component={StockChange}
     />
   </Stack.Navigator>
 );

@@ -10,29 +10,40 @@ import {
   TouchableOpacity,
   FlatList,
   Linking,
+  RefreshControl,
+  BackHandler,
 } from "react-native";
+import Constants from "expo-constants";
+import { AdMobBanner } from "expo-ads-admob";
+import httpDelegateService, { getAPI } from "../services/http-delegate.service";
 
+const testAdId = "ca-app-pub-3940256099942544/6300978111";
+const prodAdId = "ca-app-pub-1789331916266084/1171417841";
+const adUnitID = Constants.isDevice && !__DEV__ ? prodAdId : testAdId;
+console.log(__DEV__);
 import Carousel, { Pagination } from "react-native-snap-carousel";
-import { Fontisto } from "@expo/vector-icons";
-import { Foundation } from "@expo/vector-icons";
-import { SimpleLineIcons } from "@expo/vector-icons";
-import { MaterialIcons } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
-
+import {
+  Fontisto,
+  Ionicons,
+  Foundation,
+  SimpleLineIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+import { ScrollView } from "react-native-gesture-handler";
+import LoaderScreen from "./LoaderScreen";
 const SLIDER_WIDTH = Dimensions.get("window").width;
 const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const ITEM_HEIGHT = Math.round((ITEM_WIDTH * 3) / 4);
 const SIZE = Dimensions.get("window").width / 3;
 const height = Dimensions.get("window").height;
 
-const DATA = [];
-for (let i = 0; i < 10; i++) {
-  DATA.push(i);
-}
-
-export default class App extends Component {
+export default class App extends React.Component {
   state = {
     index: 0,
+    dashboardPage: true,
+    stopLoader: false,
+    stockItems: [],
+    refreshing: false,
   };
 
   constructor(props) {
@@ -44,6 +55,50 @@ export default class App extends Component {
     Alert.alert("Buy Nifty", "Oops! bought Sensex");
   };
 
+  onButtonPress = () => {
+    BackHandler.removeEventListener("hardwareBackPress", this.handleBackButton);
+    // then navigate
+    // navigate('NewScreen');
+  };
+
+  handleBackButton = () => {
+    Alert.alert(
+      "Exit App",
+      "Exiting the application?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Back"),
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => BackHandler.exitApp(),
+        },
+      ],
+      {
+        cancelable: false,
+      }
+    );
+    return true;
+  };
+
+  async componentDidMount() {
+    const result = await getAPI(
+      "https://tradertunnel.herokuapp.com/api/stock-items/top-five"
+    );
+    this.setState({ stopLoader: true });
+    if (result.status === "success") {
+      console.log("refer");
+      this.setState({ stockItems: result.data });
+    }
+    BackHandler.addEventListener("hardwareBackPress", this.handleBackButton);
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener("hardwareBackPress", this.handleBackButton);
+  }
+
   _onPressGrid = (id) => {
     if (id === "f") {
       Linking.openURL("https://telegram.me/Traderstunnel");
@@ -51,17 +106,37 @@ export default class App extends Component {
       const whatsappMsg =
         "Hi,\nI need a premium subscription for stock trading. And will undertake terms and conditions allowed by Govt. and stock traders group";
       Linking.openURL(
-        `whatsapp://send?phone=${919834383943}&text=${whatsappMsg}`
+        `whatsapp://send?phone=${918806572877}&text=${whatsappMsg}`
       ).then(() => {
         Alert.alert(
           "Success",
           "Your Premium Subscription will commence very soon"
         );
       });
-    } else if (id === "a" || id === "b") {
-      this.props.navigation.navigate("Intraday Page");
+    } else if (id === "a") {
+      this.props.navigation.navigate("Intraday Page", { type: "Intraday" });
+      BackHandler.removeEventListener(
+        "hardwareBackPress",
+        this.handleBackButton
+      );
+    } else if (id === "b") {
+      this.props.navigation.navigate("Delivery Page", { type: "Delivery" });
+      BackHandler.removeEventListener(
+        "hardwareBackPress",
+        this.handleBackButton
+      );
     } else if (id === "d") {
       this.props.navigation.navigate("Indices");
+      BackHandler.removeEventListener(
+        "hardwareBackPress",
+        this.handleBackButton
+      );
+    } else if (id === "e") {
+      this.props.navigation.navigate("Market");
+      BackHandler.removeEventListener(
+        "hardwareBackPress",
+        this.handleBackButton
+      );
     }
   };
 
@@ -82,8 +157,11 @@ export default class App extends Component {
                 justifyContent: "flex-start",
                 borderRadius: 20,
                 alignSelf: "center",
+                flex: 1,
               }}
-            >{`Sensex ${item}`}</Text>
+            >
+              {item.stockName}
+            </Text>
             <TouchableOpacity
               onPress={this._onPressCarousel}
               style={styles.itemLabelButton}
@@ -99,7 +177,7 @@ export default class App extends Component {
                   backgroundColor: "green",
                 }}
               >
-                {"Intraday Item"}
+                {item.stockType}
               </Text>
             </TouchableOpacity>
           </View>
@@ -112,13 +190,8 @@ export default class App extends Component {
             }}
           >
             <FlatList
-              data={[
-                { id: "a", name: "Target 1", value: 12.22, isCorrect: true },
-                { id: "b", name: "Target 2", value: 57.98, isCorrect: false },
-                { id: "c", name: "Target 3", value: 98.42, isCorrect: true },
-                { id: "d", name: "Stop Loss", value: 23.92, isCorrect: true },
-              ]}
-              renderItem={({ item }) => (
+              data={item.stockInnerItems}
+              renderItem={({ item, index }) => (
                 <TouchableOpacity
                   style={{
                     ...styles.carouselContainerButtons,
@@ -143,7 +216,13 @@ export default class App extends Component {
                         fontSize: 10,
                       }}
                     >
-                      {item.name}
+                      {index === 0
+                        ? "Target 1"
+                        : index === 1
+                        ? "Target 2"
+                        : index === 2
+                        ? "Target 3"
+                        : "Stop Loss"}
                     </Text>
                     <Text
                       style={{
@@ -164,14 +243,16 @@ export default class App extends Component {
                         alignItems: "flex-end",
                       }}
                     >
-                      {item.isCorrect && (
+                      {item.markColor !== "grey" && (
                         <Ionicons
                           name="checkmark-circle-sharp"
                           size={15}
-                          color="green"
+                          color={item.markColor}
                         />
                       )}
-                      {!item.isCorrect && <Text style={{ fontSize: 12 }} />}
+                      {item.markColor === "grey" && (
+                        <Text style={{ fontSize: 12 }} />
+                      )}
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -188,136 +269,174 @@ export default class App extends Component {
     );
   }
 
+  getHeader = () => {
+    return (
+      <View style={{ alignItems: "center", justifyContent: "flex-end" }}>
+        <AdMobBanner
+          bannerSize="smartBannerLandscape"
+          adUnitID="ca-app-pub-1789331916266084/1171417841"
+          servePersonalizedAds="leaderboard"
+        />
+      </View>
+    );
+  };
+
   render() {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.navBar}>
-          <Image
-            source={require("../../assets/icon-logo.jpeg")}
-            style={{ width: 80, height: 50, padding: 0 }}
-          />
-          <View style={styles.rightNav}>
-            <TouchableOpacity
-              onPress={() => this.props.navigation.navigate("Notification")}
-            >
-              <Ionicons
-                name="notifications-circle-outline"
-                size={30}
-                color="black"
+        {this.state.stockItems.length > 0 ? (
+          <SafeAreaView>
+            <SafeAreaView style={styles.navBar}>
+              <Image
+                source={require("../../assets/tradertunnel-bg.png")}
+                style={{
+                  width: 80,
+                  height: 40,
+                  padding: 0,
+                }}
               />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <Carousel
-          ref={(c) => (this.carousel = c)}
-          data={DATA}
-          renderItem={this._renderItem}
-          sliderWidth={SLIDER_WIDTH}
-          itemWidth={ITEM_WIDTH}
-          containerCustomStyle={styles.carouselContainer}
-          inactiveSlideShift={0}
-          onSnapToItem={(index) => this.setState({ index })}
-          useScrollView={true}
-          loop={true}
-          autoplay={true}
-          autoplayInterval={2000}
-          autoplayDelay={1000}
-        />
-        <View>
-          <Pagination
-            activeDotIndex={this.state.index}
-            dotsLength={DATA.length}
-            dotColor={"red"}
-            inactiveDotColor={"blue"}
-          />
-        </View>
-        <FlatList
-          data={[
-            {
-              id: "a",
-              value: "Intraday Calls",
-              icons: (
-                <Foundation
-                  name="graph-bar"
-                  size={38}
-                  color="lightblue"
-                  style={{ ...styles.gridIcons, backgroundColor: "black" }}
+              <SafeAreaView style={styles.rightNav}>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.props.navigation.navigate("Notification");
+                    BackHandler.removeEventListener(
+                      "hardwareBackPress",
+                      this.handleBackButton
+                    );
+                  }}
+                >
+                  <Ionicons
+                    name="notifications-circle-outline"
+                    size={30}
+                    color="black"
+                  />
+                </TouchableOpacity>
+              </SafeAreaView>
+            </SafeAreaView>
+            <SafeAreaView>
+              <Carousel
+                ref={(c) => (this.carousel = c)}
+                data={this.state.stockItems}
+                renderItem={this._renderItem}
+                sliderWidth={SLIDER_WIDTH}
+                itemWidth={ITEM_WIDTH}
+                containerCustomStyle={styles.carouselContainer}
+                inactiveSlideShift={0}
+                onSnapToItem={(index) => this.setState({ index })}
+                useScrollView={true}
+                loop={true}
+                autoplay={true}
+                autoplayInterval={2000}
+                autoplayDelay={1000}
+              />
+            </SafeAreaView>
+            <SafeAreaView>
+              <Pagination
+                activeDotIndex={this.state.index}
+                dotsLength={this.state.stockItems.length}
+                dotColor={"red"}
+                inactiveDotColor={"blue"}
+              />
+            </SafeAreaView>
+            <FlatList
+              data={[
+                {
+                  id: "a",
+                  value: "Intraday Calls",
+                  icons: (
+                    <Foundation
+                      name="graph-bar"
+                      size={38}
+                      color="lightblue"
+                      style={{ ...styles.gridIcons, backgroundColor: "black" }}
+                    />
+                  ),
+                },
+                {
+                  id: "b",
+                  value: "Delivery Calls",
+                  icons: (
+                    <SimpleLineIcons
+                      name="graph"
+                      size={38}
+                      color="lightblue"
+                      style={{ ...styles.gridIcons, backgroundColor: "black" }}
+                    />
+                  ),
+                },
+                {
+                  id: "c",
+                  value: "Join Premium",
+                  icons: (
+                    <MaterialIcons
+                      name="local-fire-department"
+                      size={38}
+                      color="lightblue"
+                      style={{ ...styles.gridIcons, backgroundColor: "black" }}
+                    />
+                  ),
+                },
+                {
+                  id: "d",
+                  value: "Global Indices",
+                  icons: (
+                    <Ionicons
+                      name="earth"
+                      size={38}
+                      color="black"
+                      style={styles.gridIcons}
+                    />
+                  ),
+                },
+                {
+                  id: "e",
+                  value: "Market",
+                  icons: (
+                    <Foundation
+                      name="graph-pie"
+                      size={38}
+                      color="lightblue"
+                      style={{ ...styles.gridIcons, backgroundColor: "black" }}
+                    />
+                  ),
+                },
+                {
+                  id: "f",
+                  value: "Join Telegram",
+                  icons: (
+                    <Fontisto
+                      name="telegram"
+                      size={40}
+                      color="black"
+                      style={styles.gridIcons}
+                    />
+                  ),
+                },
+              ]}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={{ ...styles.gridContainerButtons, padding: 5 }}
+                  onPress={() => this._onPressGrid(item.id)}
+                >
+                  {item.icons}
+                  <Text style={styles.gridItemLabel}>{item.value}</Text>
+                </TouchableOpacity>
+              )}
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={() => this.componentDidMount()}
                 />
-              ),
-            },
-            {
-              id: "b",
-              value: "Delivery Calls",
-              icons: (
-                <SimpleLineIcons
-                  name="graph"
-                  size={38}
-                  color="lightblue"
-                  style={{ ...styles.gridIcons, backgroundColor: "black" }}
-                />
-              ),
-            },
-            {
-              id: "c",
-              value: "Join Premium",
-              icons: (
-                <MaterialIcons
-                  name="local-fire-department"
-                  size={38}
-                  color="lightblue"
-                  style={{ ...styles.gridIcons, backgroundColor: "black" }}
-                />
-              ),
-            },
-            {
-              id: "d",
-              value: "Global Indices",
-              icons: (
-                <Ionicons
-                  name="earth"
-                  size={38}
-                  color="black"
-                  style={styles.gridIcons}
-                />
-              ),
-            },
-            {
-              id: "e",
-              value: "Market",
-              icons: (
-                <Foundation
-                  name="graph-pie"
-                  size={38}
-                  color="lightblue"
-                  style={{ ...styles.gridIcons, backgroundColor: "black" }}
-                />
-              ),
-            },
-            {
-              id: "f",
-              value: "Join Telegram",
-              icons: (
-                <Fontisto
-                  name="telegram"
-                  size={40}
-                  color="black"
-                  style={styles.gridIcons}
-                />
-              ),
-            },
-          ]}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{ ...styles.gridContainerButtons, padding: 5 }}
-              onPress={() => this._onPressGrid(item.id)}
-            >
-              {item.icons}
-              <Text style={styles.gridItemLabel}>{item.value}</Text>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item.id}
-          numColumns={3}
-        />
+              }
+              keyExtractor={(item) => item.id}
+              numColumns={3}
+              ListFooterComponent={this.getHeader}
+              ListEmptyComponent={this.getHeader}
+            />
+          </SafeAreaView>
+        ) : (
+          <LoaderScreen />
+        )}
       </SafeAreaView>
     );
   }
@@ -327,6 +446,7 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 44,
     backgroundColor: "white",
+    flex: 1,
   },
   gridContainerButtons: {
     width: SIZE,
@@ -372,7 +492,7 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     color: "white",
-    fontSize: 20,
+    fontSize: 17,
     padding: 20,
   },
   gridIcons: {

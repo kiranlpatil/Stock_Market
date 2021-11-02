@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,14 +7,184 @@ import {
   StatusBar,
   TextInput,
   ScrollView,
+  Alert,
+  FlatList,
+  ToastAndroid,
+  RefreshControl,
+  ActivityIndicator,
+  Pressable,
 } from "react-native";
+import Constants from "expo-constants";
+import * as Notifications from "expo-notifications";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Caption } from "react-native-paper";
 import RNPickerSelect, { defaultStyles } from "react-native-picker-select";
+import { AntDesign } from "@expo/vector-icons";
+import Modal from "react-native-modal";
+import StockChange from "./StockChange";
+import httpDelegateService, { getAPI } from "../services/http-delegate.service";
 
-const AdminScreen = () => {
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
+const AdminScreen = (props) => {
   const [value, setValue] = useState("");
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    // This listener is fired whenever a notification is received while the app is foregrounded
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+
+    // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+    if (Constants.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        alert("Failed to get push token for push notification!");
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      console.log(token);
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
+    return token;
+  }
+
+  const StockList = (props) => {
+    const [dataList, setDataList] = useState([]);
+    const [refreshing, setRefreshing] = useState(true);
+    const [userData, setUserData] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    useEffect(() => {
+      loadStockItems();
+    }, []);
+
+    async function loadStockItems() {
+      const result = await getAPI(
+        "https://tradertunnel.herokuapp.com/api/stock-items/top-five"
+      );
+      if (result.status === "success") {
+        setDataList(result.data);
+        setRefreshing(false);
+      }
+      return result;
+    }
+
+    return (
+      <View style={{ flex: 1 }}>
+        {refreshing ? <ActivityIndicator /> : null}
+        <FlatList
+          data={dataList}
+          keyExtractor={(item) => {
+            return item._id;
+          }}
+          renderItem={stockListItems}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => loadStockItems()}
+            />
+          }
+        />
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
+          <Caption style={{ justifyContent: "center", alignItems: "center" }}>
+            Pull to Refresh
+          </Caption>
+        </View>
+        <View style={{ padding: 20 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "green",
+              borderRadius: 20,
+              elevation: 5,
+              alignItems: "center",
+              padding: 20,
+            }}
+            onPress={() => {
+              ToastAndroid.show(
+                "Adding new item will replace last existing item",
+                ToastAndroid.SHORT
+              );
+              props.navigation.navigate("StockChange", { stockItem: null });
+            }}
+          >
+            <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+              Add New Stock Item
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
+  const stockListItems = ({ item }) => {
+    return (
+      <View style={styles.row}>
+        <View>
+          <View style={styles.nameContainer}>
+            <Text style={styles.nameTxt}>{item.stockName}</Text>
+          </View>
+          <View style={styles.end}>
+            <Text style={styles.time}>{item.dateInString}</Text>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={{ paddingRight: 10 }}
+          onPress={() =>
+            props.navigation.navigate("StockChange", { stockItem: item })
+          }
+        >
+          <AntDesign name="edit" size={25} color="black" />
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   const StockTab = () => {
     return (
@@ -60,7 +230,10 @@ const AdminScreen = () => {
           </View>
 
           <View style={styles.submitButtonView}>
-            <TouchableOpacity style={styles.submitButton}>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={() => Alert.alert("Not connected to Backend server")}
+            >
               <Text style={styles.submitButtonLabel}>Send</Text>
             </TouchableOpacity>
           </View>
@@ -70,6 +243,29 @@ const AdminScreen = () => {
   };
 
   const NotificationTab = () => {
+    const [title, setTitle] = useState("");
+    const [body, setBody] = useState("");
+
+    async function sendPushNotification(expoPushToken) {
+      const message = {
+        title: title,
+        message: body,
+      };
+
+      httpDelegateService(
+        "https://tradertunnel.herokuapp.com/api/push-notification",
+        message,
+        true
+      ).then((result) => {
+        if (result.status === "success") {
+          Alert.alert(
+            "Success sending message",
+            "It may take some time to send all the users"
+          );
+        }
+      });
+    }
+
     return (
       <View style={styles.container2}>
         <ScrollView
@@ -79,7 +275,12 @@ const AdminScreen = () => {
             <Text style={styles.headerLabel}>Notification Header</Text>
           </View>
           <View style={styles.inputBox}>
-            <TextInput style={styles.inputHeader} maxLength={25} />
+            <TextInput
+              style={styles.inputHeader}
+              maxLength={25}
+              value={title}
+              onChangeText={(val) => setTitle(val)}
+            />
           </View>
           <View style={styles.header}>
             <Text style={styles.headerLabel}>
@@ -91,10 +292,20 @@ const AdminScreen = () => {
               style={styles.inputBody}
               keyboardType="twitter"
               multiline={true}
+              maxLength={100}
+              value={body}
+              onChangeText={(val) => setBody(val)}
             />
           </View>
+          <Caption>{expoPushToken}</Caption>
           <View style={styles.submitButtonView}>
-            <TouchableOpacity style={styles.submitButton}>
+            <TouchableOpacity
+              style={styles.submitButton}
+              disabled={title === ""}
+              onPress={async () => {
+                await sendPushNotification(expoPushToken);
+              }}
+            >
               <Text style={styles.submitButtonLabel}>Send</Text>
             </TouchableOpacity>
           </View>
@@ -124,7 +335,7 @@ const AdminScreen = () => {
           tabBarStyle: { backgroundColor: "#0FADAF" },
         }}
       >
-        <Tab.Screen name="Stock Items" component={StockTab} />
+        <Tab.Screen name="Stock Items" component={StockList} />
         <Tab.Screen name="Notifications" component={NotificationTab} />
       </Tab.Navigator>
     </SafeAreaView>
@@ -235,6 +446,96 @@ const styles = StyleSheet.create({
   submitButtonLabel: {
     fontSize: 15,
     fontWeight: "700",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#dcdcdc",
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    padding: 10,
+    justifyContent: "space-between",
+  },
+  nameContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: 270,
+  },
+  nameTxt: {
+    marginLeft: 15,
+    fontWeight: "600",
+    color: "#222",
+    fontSize: 15,
+  },
+  end: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  time: {
+    fontWeight: "400",
+    color: "#666",
+    fontSize: 12,
+    marginLeft: 15,
+  },
+  icon: {
+    height: 28,
+    width: 28,
+    alignItems: "flex-end",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // marginTop: 22,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  text: {
+    color: "#0c0c0c",
+    fontSize: 20,
+    fontFamily: "Roboto",
+    width: "100%",
+    fontWeight: "bold",
+  },
+  textInputBox: {
+    backgroundColor: "azure",
+    borderRadius: 14,
+    flexDirection: "row",
+    width: "80%",
+    padding: 15,
+    marginVertical: 15,
+    textAlign: "center",
+    shadowColor: "#6e6969",
+    shadowOffset: {
+      width: 3,
+      height: 7,
+    },
+    shadowOpacity: 10.2,
+    shadowRadius: 10.41,
+    elevation: 2,
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 

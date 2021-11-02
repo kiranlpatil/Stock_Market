@@ -14,17 +14,11 @@ import {
 } from "react-native";
 const statusBarHeight = Constants.statusBarHeight;
 import { rgbaColor } from "react-native-reanimated/src/reanimated2/Colors";
-import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
 import faker from "faker";
-import {
-  Ionicons,
-  MaterialIcons,
-  SimpleLineIcons,
-  Foundation,
-  Fontisto,
-} from "@expo/vector-icons";
 import { Caption } from "react-native-paper";
+import LoaderScreen from "./LoaderScreen";
+import { getAPI } from "../services/http-delegate.service";
 
 const SLIDER_WIDTH = Dimensions.get("window").width;
 const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.8);
@@ -52,7 +46,22 @@ const AVATAR_SIZE = 70;
 const ITEM_SIZE = AVATAR_SIZE + SPACING * 5;
 
 export default function NotificationScreen() {
-  const [images, imageData] = useState([]);
+  const [notificationData, setNotificationData] = useState([]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const loadNotifications = () => {
+    getAPI("https://tradertunnel.herokuapp.com/api/push-notification").then(
+      (result) => {
+        console.log("get gainers");
+        if (result.status === 200) {
+          setNotificationData(result.data);
+        }
+      }
+    );
+  };
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
   return (
@@ -62,55 +71,59 @@ export default function NotificationScreen() {
         style={StyleSheet.absoluteFillObject}
         blurRadius={40}
       />
-      <Animated.FlatList
-        data={DATA}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={{
-          padding: SPACING,
-          // paddingTop: StatusBar.currentHeight || 42,
-        }}
-        renderItem={({ item, index }) => {
-          return (
-            <Animated.View
-              style={{
-                flexDirection: "row",
-                padding: SPACING,
-                marginBottom: SPACING,
-                backgroundColor: rgbaColor(255, 255, 255, 0.8),
-                borderRadius: 12,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.4,
-                shadowRadius: 20,
-              }}
-            >
-              <View
+      {notificationData && notificationData.length > 0 ? (
+        <Animated.FlatList
+          data={notificationData}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={{
+            padding: SPACING,
+            // paddingTop: StatusBar.currentHeight || 42,
+          }}
+          renderItem={({ item, index }) => {
+            return (
+              <Animated.View
                 style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "flex-start",
+                  flexDirection: "row",
+                  padding: SPACING,
+                  marginBottom: SPACING,
+                  backgroundColor: rgbaColor(255, 255, 255, 0.8),
+                  borderRadius: 12,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 10 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 20,
                 }}
               >
-                <Text style={{ fontSize: 15, fontWeight: "800" }}>
-                  {"Buy Hindalco hit by 21"}
-                </Text>
-                <Text
-                  style={{ fontSize: 12, fontWeight: "500", paddingTop: 10 }}
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "flex-start",
+                  }}
                 >
-                  {"Purchase this at once"}
-                </Text>
-                <Caption style={{ paddingTop: 5 }}>
-                  {"12:00 Thurday 7, 2021"}
-                </Caption>
-              </View>
-            </Animated.View>
-          );
-        }}
-      />
+                  <Text style={{ fontSize: 15, fontWeight: "800" }}>
+                    {item.title}
+                  </Text>
+                  <Text
+                    style={{ fontSize: 12, fontWeight: "500", paddingTop: 10 }}
+                  >
+                    {item.message}
+                  </Text>
+                  <Caption style={{ paddingTop: 5 }}>
+                    {item.dateInString}
+                  </Caption>
+                </View>
+              </Animated.View>
+            );
+          }}
+        />
+      ) : (
+        <LoaderScreen />
+      )}
     </SafeAreaView>
   );
 }

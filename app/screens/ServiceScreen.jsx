@@ -6,6 +6,7 @@ import {
   View,
   StyleSheet,
   SafeAreaView,
+  Linking,
   TouchableOpacity,
 } from "react-native";
 const statusBarHeight = Constants.statusBarHeight;
@@ -17,18 +18,30 @@ import { useEffect, useState } from "react";
 import { Caption } from "react-native-paper";
 
 faker.seed(10);
-const DATA = [...Array(3).keys()].map((_, i) => {
-  return {
-    key: faker.random.uuid(),
-    image: `https://randomuser.me/api/portraits/${faker.helpers.randomize([
-      "women",
-      "men",
-    ])}/${faker.random.number(60)}.jpg`,
-    name: faker.name.findName(),
-    jobTitle: faker.name.jobTitle(),
-    email: faker.internet.email(),
-  };
-});
+const DATA = [
+  {
+    id: "1",
+    title: "FREE FREE ACCOUNT OPENING FREE",
+    subTitle:
+      '"Open Free_Demat Accountwith us by\n Our Referral Link in Zerodha"',
+    caption: " (After successful Account Opening and Only for Active Trader) ",
+    body: '"Benefits:- You will get premium service for 1 Year"',
+    footer: "WhatsApp Only: 8806572877",
+    button: "OPEN NOW",
+    url: "https://zerodha.com/open-account?c=QE5071",
+  },
+  {
+    id: "2",
+    title: "FREE FREE ACCOUNT OPENING FREE",
+    subTitle:
+      '"Open Free_Demat Accountwith us by\n Our Referral Link in ANGEL BROKING"',
+    caption: " (After successful Account Opening and Only for Active Trader) ",
+    body: '"Benefits:- You will get premium service for 1 Year"',
+    footer: "WhatsApp Only: 8806572877",
+    button: "OPEN NOW",
+    url: "https://tinyurl.com/yf4jvoqb",
+  },
+];
 
 const SPACING = 20;
 const AVATAR_SIZE = 70;
@@ -53,7 +66,7 @@ export default function ServiceScreen() {
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
         )}
-        keyExtractor={(item) => item.key}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{
           padding: SPACING,
           paddingTop: StatusBar.currentHeight || 42,
@@ -95,7 +108,7 @@ export default function ServiceScreen() {
                 transform: [{ scale }],
               }}
             >
-              <Image
+              {/* <Image
                 source={require("../../assets/icon-logo.jpeg")}
                 style={{
                   width: "100%",
@@ -103,34 +116,24 @@ export default function ServiceScreen() {
                   padding: 0,
                   borderRadius: 10,
                 }}
-              />
+              /> */}
 
               <View
-                style={{ flex: 1, justifyContent: "center", paddingTop: 20 }}
+                style={{ flex: 1, justifyContent: "center", paddingTop: 10 }}
               >
-                <Text style={styles.textStyle}>
-                  FREE FREE ACCOUNT OPENING FREE
-                </Text>
+                <Text style={styles.textStyle}>{item.title}</Text>
               </View>
               <View style={{ flex: 1, justifyContent: "center" }}>
-                <Text style={styles.textStyle}>
-                  {
-                    "Open Free_Demat Accountwith us by\n Our Referral Link in IIFL"
-                  }
-                </Text>
+                <Text style={styles.textStyle}>{item.subTitle}</Text>
                 <Caption
                   style={
                     (styles.textStyle, { fontWeight: "bold", fontSize: 13 })
                   }
                 >
-                  (After successful Account Opening and Only for Active Trader)
+                  {item.caption}
                 </Caption>
-                <Text style={styles.textStyle}>
-                  {"Benefits:- You will get Expert Groups for @1Year"}
-                </Text>
-                <Text style={styles.textStyle}>
-                  {"WhatsApp Only: 8822883332 or 9823235562"}
-                </Text>
+                <Text style={styles.textStyle}>{item.body}</Text>
+                <Text style={styles.textStyle}>{item.footer}</Text>
                 <TouchableOpacity
                   style={{
                     width: "100%",
@@ -140,8 +143,11 @@ export default function ServiceScreen() {
                     justifyContent: "center",
                     alignItems: "center",
                   }}
+                  onPress={() => {
+                    Linking.openURL(item.url);
+                  }}
                 >
-                  <Text style={{ color: "white" }}>Open Now</Text>
+                  <Text style={{ color: "white" }}>{item.button}</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>

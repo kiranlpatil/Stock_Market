@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View } from "react-native";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import {
@@ -10,12 +10,30 @@ import DashboardScreen from "./DashboardScreen";
 import SettingScreen from "./SettingsScreen";
 import ServiceScreen from "./ServiceScreen";
 import UpdatesScreen from "./UpdatesScreen";
+import * as SecureStore from "expo-secure-store";
 import AdminScreen from "./AdminScreen";
+import httpDelegateService, { getAPI } from "../services/http-delegate.service";
 
 const Tab = createMaterialBottomTabNavigator();
 
 function MyTabs() {
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    getAdminRole().then(
+      (credentials) => setIsAdmin(credentials.isAdmin)
+      // setIsAdmin(true)
+    );
+  }, []);
+
+  async function getAdminRole() {
+    const result = await getAPI(
+      "https://tradertunnel.herokuapp.com/api/auth/user"
+    );
+    await SecureStore.setItemAsync("mail", JSON.stringify(result.data));
+    return result.data;
+  }
+
   return (
     <Tab.Navigator
       initialRouteName="Feed"
@@ -31,17 +49,6 @@ function MyTabs() {
           tabBarColor: "#1f65ff",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="home" color={color} size={26} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Updates"
-        component={UpdatesScreen}
-        options={{
-          tabBarLabel: "Updates",
-          tabBarColor: "#7f00ff",
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="update" color={color} size={26} />
           ),
         }}
       />

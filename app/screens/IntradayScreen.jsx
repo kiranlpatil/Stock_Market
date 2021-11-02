@@ -13,10 +13,8 @@ import {
   FlatList,
 } from "react-native";
 const statusBarHeight = Constants.statusBarHeight;
-import { rgbaColor } from "react-native-reanimated/src/reanimated2/Colors";
-import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
-import faker from "faker";
+import { getAPI } from "../services/http-delegate.service";
 import {
   Ionicons,
   MaterialIcons,
@@ -24,213 +22,210 @@ import {
   Foundation,
   Fontisto,
 } from "@expo/vector-icons";
+import LoaderScreen from "./LoaderScreen";
 
 const SLIDER_WIDTH = Dimensions.get("window").width;
 const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.8);
 const ITEM_HEIGHT = Math.round((ITEM_WIDTH * 3) / 4);
 const SIZE = Dimensions.get("window").width / 3;
 
-faker.seed(10);
-const DATA = [...Array(30).keys()].map((_, i) => {
-  return {
-    key: faker.random.uuid(),
-    image: `https://randomuser.me/api/portraits/${faker.helpers.randomize([
-      "women",
-      "men",
-    ])}/${faker.random.number(60)}.jpg`,
-    name: faker.name.findName(),
-    jobTitle: faker.name.jobTitle(),
-    email: faker.internet.email(),
-  };
-});
-
-const BG_IMG =
-  "https://images.pexels.com/photos/2470655/pexels-photo-2470655.jpeg";
 const SPACING = 20;
 const AVATAR_SIZE = 70;
 const ITEM_SIZE = AVATAR_SIZE + SPACING * 5;
 
-export default function IntradayScreen() {
-  const [images, imageData] = useState([]);
+export default function IntradayScreen(props) {
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    loadStockItems();
+  }, []);
+
+  async function loadStockItems() {
+    const type = props.route.params.type;
+    let link;
+    console.log(type);
+    if (type === "Intraday") {
+      link =
+        "https://tradertunnel.herokuapp.com/api/stock-items/Intraday%20Buy";
+    } else {
+      link =
+        "https://tradertunnel.herokuapp.com/api/stock-items/Delivery%20Buy";
+    }
+    const result = await getAPI(link);
+    if (result.status === "success") {
+      setItems(result.data);
+    }
+    return result;
+  }
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: statusBarHeight }}>
       <Image
-        source={{ uri: BG_IMG }}
+        source={{
+          uri: "https://images.pexels.com/photos/2470655/pexels-photo-2470655.jpeg",
+        }}
         style={StyleSheet.absoluteFillObject}
         blurRadius={40}
       />
-      <Animated.FlatList
-        data={DATA}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={{
-          padding: SPACING,
-          // paddingTop: StatusBar.currentHeight || 42,
-        }}
-        renderItem={({ item, index }) => {
-          return (
-            <Animated.View
-              style={{
-                flexDirection: "row",
-                padding: SPACING,
-                marginBottom: SPACING,
-                // backgroundColor: rgbaColor(255, 255, 255, 0.8),
-                elevation: 5,
-                borderRadius: 12,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.4,
-                shadowRadius: 20,
-              }}
-            >
-              <View>
-                <View style={styles.itemContainer}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "flex-start",
-                      justifyContent: "space-around",
-                    }}
-                  >
-                    <Text
+      {items.length > 0 ? (
+        <Animated.FlatList
+          data={items}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={{
+            padding: SPACING,
+            // paddingTop: StatusBar.currentHeight || 42,
+          }}
+          renderItem={({ item, index }) => {
+            return (
+              <Animated.View
+                style={{
+                  flexDirection: "row",
+                  padding: SPACING,
+                  marginBottom: SPACING,
+                  // backgroundColor: rgbaColor(255, 255, 255, 0.8),
+                  elevation: 5,
+                  borderRadius: 12,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 10 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 20,
+                }}
+              >
+                <View>
+                  <View style={styles.itemContainer}>
+                    <View
                       style={{
-                        ...styles.itemLabel,
-                        justifyContent: "flex-start",
-                        borderRadius: 20,
-                        alignSelf: "center",
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        justifyContent: "space-around",
                       }}
-                    >{`Sensex High`}</Text>
-                    <TouchableOpacity style={styles.itemLabelButton}>
+                    >
                       <Text
                         style={{
                           ...styles.itemLabel,
-                          justifyContent: "center",
+                          justifyContent: "flex-start",
                           borderRadius: 20,
-                          fontSize: 17,
                           alignSelf: "center",
-                          alignContent: "center",
-                          backgroundColor: "green",
+                          flex: 1,
                         }}
                       >
-                        {"Intraday Item"}
+                        {item.stockName}
                       </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: 5,
-                    }}
-                  >
-                    <FlatList
-                      data={[
-                        {
-                          id: "a",
-                          name: "Target 1",
-                          value: 12.22,
-                          isCorrect: true,
-                        },
-                        {
-                          id: "b",
-                          name: "Target 2",
-                          value: 57.98,
-                          isCorrect: false,
-                        },
-                        {
-                          id: "c",
-                          name: "Target 3",
-                          value: 98.42,
-                          isCorrect: true,
-                        },
-                        {
-                          id: "d",
-                          name: "Stop Loss",
-                          value: 23.92,
-                          isCorrect: true,
-                        },
-                      ]}
-                      renderItem={({ item }) => (
-                        <TouchableOpacity
+                      <TouchableOpacity style={styles.itemLabelButton}>
+                        <Text
                           style={{
-                            ...styles.carouselContainerButtons,
-                            padding: 2,
-                            flexDirection: "column",
+                            ...styles.itemLabel,
+                            justifyContent: "center",
+                            borderRadius: 20,
+                            fontSize: 17,
+                            alignSelf: "center",
+                            alignContent: "center",
+                            backgroundColor: "green",
                           }}
                         >
-                          <View
+                          {item.stockType}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: 5,
+                      }}
+                    >
+                      <FlatList
+                        data={item.stockInnerItems}
+                        renderItem={({ item, index }) => (
+                          <TouchableOpacity
                             style={{
-                              backgroundColor: "lightgreen",
-                              flex: 1,
-                              justifyContent: "center",
-                              borderRadius: 10,
-                              alignContent: "center",
+                              ...styles.carouselContainerButtons,
+                              padding: 2,
+                              flexDirection: "column",
                             }}
                           >
-                            <Text
-                              style={{
-                                padding: 2,
-                                justifyContent: "flex-start",
-                                alignSelf: "center",
-                                fontSize: 13,
-                              }}
-                            >
-                              {item.name}
-                            </Text>
-                            <Text
-                              style={{
-                                padding: 1,
-                                justifyContent: "flex-end",
-                                alignSelf: "center",
-                                fontSize: 12,
-                              }}
-                            >
-                              {item.value}
-                            </Text>
                             <View
                               style={{
-                                justifyContent: "flex-end",
-                                padding: 2,
-                                paddingRight: 5,
-                                width: "100%",
-                                alignItems: "flex-end",
+                                backgroundColor: "lightgreen",
+                                flex: 1,
+                                justifyContent: "center",
+                                borderRadius: 10,
+                                alignContent: "center",
                               }}
                             >
-                              {item.isCorrect && (
-                                <Ionicons
-                                  name="checkmark-circle-sharp"
-                                  size={15}
-                                  color="green"
-                                />
-                              )}
-                              {!item.isCorrect && (
-                                <Text style={{ fontSize: 12 }} />
-                              )}
+                              <Text
+                                style={{
+                                  padding: 2,
+                                  justifyContent: "flex-start",
+                                  alignSelf: "center",
+                                  fontSize: 13,
+                                }}
+                              >
+                                {index === 0
+                                  ? "Target 1"
+                                  : index === 1
+                                  ? "Target 2"
+                                  : index === 2
+                                  ? "Target 3"
+                                  : "Stop Loss"}
+                              </Text>
+                              <Text
+                                style={{
+                                  padding: 1,
+                                  justifyContent: "flex-end",
+                                  alignSelf: "center",
+                                  fontSize: 12,
+                                }}
+                              >
+                                {item.value}
+                              </Text>
+                              <View
+                                style={{
+                                  justifyContent: "flex-end",
+                                  padding: 2,
+                                  paddingRight: 5,
+                                  width: "100%",
+                                  alignItems: "flex-end",
+                                }}
+                              >
+                                {item.markColor !== "grey" && (
+                                  <Ionicons
+                                    name="checkmark-circle-sharp"
+                                    size={15}
+                                    color={item.markColor}
+                                  />
+                                )}
+                                {item.markColor === "grey" && (
+                                  <Text style={{ fontSize: 12 }} />
+                                )}
+                              </View>
                             </View>
-                          </View>
-                        </TouchableOpacity>
-                      )}
-                      keyExtractor={(item) => item.id}
-                      numColumns={4}
-                    />
-                  </View>
-                  <View style={{ paddingLeft: 12, paddingBottom: 15 }}>
-                    <Text style={{ color: "black" }}>
-                      09:28 Thursday 26, 2021
-                    </Text>
+                          </TouchableOpacity>
+                        )}
+                        keyExtractor={(item) => item._id}
+                        numColumns={4}
+                      />
+                    </View>
+                    <View style={{ paddingLeft: 12, paddingBottom: 15 }}>
+                      <Text style={{ color: "black" }}>
+                        {item.dateInString}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </Animated.View>
-          );
-        }}
-      />
+              </Animated.View>
+            );
+          }}
+        />
+      ) : (
+        <LoaderScreen />
+      )}
     </SafeAreaView>
   );
 }
@@ -356,7 +351,7 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     color: "white",
-    fontSize: 20,
+    fontSize: 18,
     padding: 20,
   },
   gridIcons: {
