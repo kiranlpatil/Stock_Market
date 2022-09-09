@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { enableScreens } from "react-native-screens";
@@ -15,27 +15,36 @@ import SplashScreen from "./app/screens/SplashScreen";
 import MarketsScreen from "./app/screens/MarketsScreen";
 import AdCampaign from "./app/screens/AdCampaign";
 import StockChange from "./app/screens/StockChange";
+import TermsAndConditions from "./app/screens/TermsAndCondtions";
+import PrivacyPolicy from "./app/screens/PrivacyPolicy";
+import * as SecureStore from "expo-secure-store";
+import ContactUsScreen from "./app/screens/ContactUsScreen";
 
 enableScreens();
 
 const Stack = createStackNavigator();
-const StackNavigator = () => (
+const StackNavigator = ({ credentials }) => (
   <Stack.Navigator screenOptions={{ gestureEnabled: true }}>
-    <Stack.Screen
-      options={{ headerShown: false }}
-      name="Login Page"
-      component={SplashScreen}
-    />
-    <Stack.Screen
-      options={{ headerShown: false }}
-      name="Login"
-      component={LoginScreen}
-    />
-    <Stack.Screen
-      options={{ headerShown: false }}
-      name="Verification Page"
-      component={VerificationScreen}
-    />
+    {credentials ? (
+      <React.Fragment>
+        {console.log(credentials)}
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Login Page"
+          component={SplashScreen}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Login"
+          component={LoginScreen}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Verification Page"
+          component={VerificationScreen}
+        />
+      </React.Fragment>
+    ) : null}
     <Stack.Screen
       options={{
         headerShown: false,
@@ -102,6 +111,21 @@ const StackNavigator = () => (
       }}
       name="Delivery Page"
       component={IntradayScreen}
+    />
+    <Stack.Screen
+      options={{
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "#00BFFF",
+        },
+        headerTintColor: "#fff",
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+      }}
+      name="Contact Us"
+      component={ContactUsScreen}
     />
     <Stack.Screen
       options={{
@@ -193,15 +217,55 @@ const StackNavigator = () => (
       name="StockChange"
       component={StockChange}
     />
+    <Stack.Screen
+      options={{
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "#00BFFF",
+        },
+        headerTintColor: "#fff",
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+      }}
+      name="Terms And Conditions"
+      component={TermsAndConditions}
+    />
+    <Stack.Screen
+      options={{
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "#00BFFF",
+        },
+        headerTintColor: "#fff",
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+      }}
+      name="Privacy Policy"
+      component={PrivacyPolicy}
+    />
   </Stack.Navigator>
 );
-class App extends Component {
-  render() {
-    return (
-      <NavigationContainer>
-        <StackNavigator />
-      </NavigationContainer>
-    );
-  }
-}
+const App = () => {
+  const [credentials, setCredentials] = useState({});
+  const [storageCheck, setStorageCheck] = useState(false);
+
+  useEffect(() => {
+    SecureStore.getItemAsync("mail")
+      .catch((err) => setCredentials(null))
+      .then((res) => {
+        setCredentials(res);
+        setStorageCheck(true);
+      });
+  }, [credentials]);
+
+  return (
+    <NavigationContainer>
+      {storageCheck && <StackNavigator credentials={credentials} />}
+    </NavigationContainer>
+  );
+};
 export default App;

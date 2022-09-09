@@ -13,11 +13,9 @@ const statusBarHeight = Constants.statusBarHeight;
 import { rgbaColor } from "react-native-reanimated/src/reanimated2/Colors";
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
-import faker from "faker";
 import { useEffect, useState } from "react";
 import { Caption } from "react-native-paper";
 
-faker.seed(10);
 const DATA = [
   {
     id: "1",
@@ -29,6 +27,7 @@ const DATA = [
     footer: "WhatsApp Only: 8806572877",
     button: "OPEN NOW",
     url: "https://zerodha.com/open-account?c=QE5071",
+    image: require("../../assets/zerodha.jpeg"),
   },
   {
     id: "2",
@@ -40,6 +39,7 @@ const DATA = [
     footer: "WhatsApp Only: 8806572877",
     button: "OPEN NOW",
     url: "https://tinyurl.com/yf4jvoqb",
+    image: require("../../assets/angel_broke.jpeg"),
   },
 ];
 
@@ -108,16 +108,19 @@ export default function ServiceScreen() {
                 transform: [{ scale }],
               }}
             >
-              {/* <Image
-                source={require("../../assets/icon-logo.jpeg")}
+              <Image
+                source={
+                  item?.image
+                    ? item.image
+                    : require("../../assets/zerodha.jpeg")
+                }
                 style={{
                   width: "100%",
                   height: 130,
                   padding: 0,
                   borderRadius: 10,
                 }}
-              /> */}
-
+              />
               <View
                 style={{ flex: 1, justifyContent: "center", paddingTop: 10 }}
               >

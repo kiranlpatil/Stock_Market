@@ -11,16 +11,16 @@ import {
   FlatList,
   Linking,
   RefreshControl,
+  Caption,
   BackHandler,
 } from "react-native";
 import Constants from "expo-constants";
 import { AdMobBanner } from "expo-ads-admob";
 import httpDelegateService, { getAPI } from "../services/http-delegate.service";
-
+import Modal from "react-native-modal"; // 2.4.0
 const testAdId = "ca-app-pub-3940256099942544/6300978111";
 const prodAdId = "ca-app-pub-1789331916266084/1171417841";
 const adUnitID = Constants.isDevice && !__DEV__ ? prodAdId : testAdId;
-console.log(__DEV__);
 import Carousel, { Pagination } from "react-native-snap-carousel";
 import {
   Fontisto,
@@ -44,6 +44,8 @@ export default class App extends React.Component {
     stopLoader: false,
     stockItems: [],
     refreshing: false,
+    visibleModal: false,
+    modalItem: {},
   };
 
   constructor(props) {
@@ -51,8 +53,9 @@ export default class App extends React.Component {
     this._renderItem = this._renderItem.bind(this);
   }
 
-  _onPressCarousel = () => {
-    Alert.alert("Buy Nifty", "Oops! bought Sensex");
+  _onPressCarousel = (item) => {
+    this.setState({ visibleModal: true });
+    this.setState({ modalItem: item });
   };
 
   onButtonPress = () => {
@@ -89,7 +92,6 @@ export default class App extends React.Component {
     );
     this.setState({ stopLoader: true });
     if (result.status === "success") {
-      console.log("refer");
       this.setState({ stockItems: result.data });
     }
     BackHandler.addEventListener("hardwareBackPress", this.handleBackButton);
@@ -102,15 +104,24 @@ export default class App extends React.Component {
   _onPressGrid = (id) => {
     if (id === "f") {
       Linking.openURL("https://telegram.me/Traderstunnel");
-    } else if (id === "c") {
-      const whatsappMsg =
-        "Hi,\nI need a premium subscription for stock trading. And will undertake terms and conditions allowed by Govt. and stock traders group";
-      Linking.openURL(
-        `whatsapp://send?phone=${918806572877}&text=${whatsappMsg}`
-      ).then(() => {
+    }
+    // else if (id === "c") {
+    //   const whatsappMsg =
+    //     "Hi,\nI WANT TO JOIN YOUR PREMIUM SERVICE SO LET ME KNOW THE PROCEDURE AND PLANS FOR IT";
+    //   Linking.openURL(
+    //     `whatsapp://send?phone=${918866116022}&text=${whatsappMsg}`
+    //   ).then(() => {
+    //     Alert.alert(
+    //       "Success",
+    //       "Your Premium Subscription will be attended very soon"
+    //     );
+    //   });
+    // }
+    else if (id === "c") {
+      Linking.openURL(`https://rigipay.com/g/iHpaYuLFrK`).then(() => {
         Alert.alert(
           "Success",
-          "Your Premium Subscription will commence very soon"
+          "Your Premium Subscription will be attended very soon"
         );
       });
     } else if (id === "a") {
@@ -163,7 +174,7 @@ export default class App extends React.Component {
               {item.stockName}
             </Text>
             <TouchableOpacity
-              onPress={this._onPressCarousel}
+              onPress={() => this._onPressCarousel(item)}
               style={styles.itemLabelButton}
             >
               <Text
@@ -171,7 +182,7 @@ export default class App extends React.Component {
                   ...styles.itemLabel,
                   justifyContent: "center",
                   borderRadius: 20,
-                  fontSize: 17,
+                  fontSize: 14,
                   alignSelf: "center",
                   alignContent: "center",
                   backgroundColor: "green",
@@ -261,8 +272,18 @@ export default class App extends React.Component {
               numColumns={4}
             />
           </View>
+          <View
+            style={{
+              flex: 1,
+              paddingLeft: 10,
+              justifyContent: "center",
+              alignItems: "flex-start",
+            }}
+          >
+            <Text style={{ fontSize: 12 }}>Note: Educational Purpose only</Text>
+          </View>
           <View style={{ paddingLeft: 10, paddingBottom: 12 }}>
-            <Text style={{ color: "black" }}>09:28 Thursday 26, 2021</Text>
+            <Text style={{ color: "black" }}>{item.dateInString}</Text>
           </View>
         </View>
       </View>
@@ -274,7 +295,7 @@ export default class App extends React.Component {
       <View style={{ alignItems: "center", justifyContent: "flex-end" }}>
         <AdMobBanner
           bannerSize="smartBannerLandscape"
-          adUnitID="ca-app-pub-1789331916266084/1171417841"
+          adUnitID={adUnitID}
           servePersonalizedAds="leaderboard"
         />
       </View>
@@ -284,6 +305,47 @@ export default class App extends React.Component {
   render() {
     return (
       <SafeAreaView style={styles.container}>
+        <Modal
+          isVisible={this.state.visibleModal}
+          backdropColor={"black"}
+          backdropOpacity={0.4}
+          animationIn={"zoomInDown"}
+          animationOut={"zoomOutUp"}
+          animationInTiming={1000}
+          animationOutTiming={1000}
+          backdropTransitionInTiming={1000}
+          backdropTransitionOutTiming={1000}
+        >
+          <View
+            style={{
+              backgroundColor: "lightskyblue",
+              padding: 15,
+              flex: 0.35,
+              justifyContent: "space-between",
+              elevation: 5,
+              alignItems: "center",
+              borderRadius: 4,
+              borderColor: "rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            {this._renderItem({ item: this.state.modalItem })}
+            <TouchableOpacity
+              style={{
+                padding: 10,
+                elevation: 5,
+
+                borderRadius: 20,
+                alignItems: "center",
+                backgroundColor: "green",
+                justifyContent: "flex-end",
+                width: "40%",
+              }}
+              onPress={() => this.setState({ visibleModal: false })}
+            >
+              <Text style={{ color: "white" }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
         {this.state.stockItems.length > 0 ? (
           <SafeAreaView>
             <SafeAreaView style={styles.navBar}>
@@ -326,7 +388,7 @@ export default class App extends React.Component {
                 useScrollView={true}
                 loop={true}
                 autoplay={true}
-                autoplayInterval={2000}
+                autoplayInterval={3000}
                 autoplayDelay={1000}
               />
             </SafeAreaView>
@@ -493,7 +555,7 @@ const styles = StyleSheet.create({
   itemLabel: {
     color: "white",
     fontSize: 17,
-    padding: 20,
+    padding: 14,
   },
   gridIcons: {
     zIndex: 1,
@@ -529,7 +591,7 @@ const styles = StyleSheet.create({
   },
   itemLabelButton: {
     color: "white",
-    fontSize: 20,
+    fontSize: 15,
     justifyContent: "center",
     borderRadius: 20,
     paddingRight: 10,

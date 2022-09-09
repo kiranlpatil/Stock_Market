@@ -80,7 +80,6 @@ const AdminScreen = (props) => {
         return;
       }
       token = (await Notifications.getExpoPushTokenAsync()).data;
-      console.log(token);
     }
 
     if (Platform.OS === "android") {
@@ -164,6 +163,19 @@ const AdminScreen = (props) => {
   };
 
   const stockListItems = ({ item }) => {
+    const deleteItem = () => {
+      httpDelegateService(
+        "https://tradertunnel.herokuapp.com/api/stock-items/" + item._id,
+        null,
+        true,
+        true
+      ).then((result) => {
+        if (result.status === "success") {
+          Alert.alert("Success", "Refresh Page manually");
+        }
+      });
+    };
+
     return (
       <View style={styles.row}>
         <View>
@@ -181,6 +193,12 @@ const AdminScreen = (props) => {
           }
         >
           <AntDesign name="edit" size={25} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ paddingRight: 10 }}
+          onPress={() => deleteItem()}
+        >
+          <AntDesign name="delete" size={24} color="black" />
         </TouchableOpacity>
       </View>
     );
@@ -250,8 +268,8 @@ const AdminScreen = (props) => {
       const message = {
         title: title,
         message: body,
+        dateCreated: new Date().toLocaleString(),
       };
-
       httpDelegateService(
         "https://tradertunnel.herokuapp.com/api/push-notification",
         message,
@@ -277,7 +295,8 @@ const AdminScreen = (props) => {
           <View style={styles.inputBox}>
             <TextInput
               style={styles.inputHeader}
-              maxLength={25}
+              maxLength={60}
+              placeholder={"Max 60 Characters"}
               value={title}
               onChangeText={(val) => setTitle(val)}
             />
@@ -292,12 +311,13 @@ const AdminScreen = (props) => {
               style={styles.inputBody}
               keyboardType="twitter"
               multiline={true}
-              maxLength={100}
+              maxLength={200}
               value={body}
+              placeholder={"Max 200 Characters"}
               onChangeText={(val) => setBody(val)}
             />
+            {/* <Caption>{expoPushToken}</Caption> */}
           </View>
-          <Caption>{expoPushToken}</Caption>
           <View style={styles.submitButtonView}>
             <TouchableOpacity
               style={styles.submitButton}

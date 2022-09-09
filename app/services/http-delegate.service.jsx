@@ -6,14 +6,24 @@ export default async function httpDelegateService(url, body, token, method) {
     let requestOptions;
     token = await SecureStore.getItemAsync("token");
     if (token) {
-      requestOptions = {
-        method: method ? "PATCH" : "POST",
-        headers: {
-          "x-auth-token": token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      };
+      if (body !== null) {
+        requestOptions = {
+          method: method ? "PATCH" : "POST",
+          headers: {
+            "x-auth-token": token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        };
+      } else {
+        requestOptions = {
+          method: method ? "DELETE" : "POST",
+          headers: {
+            "x-auth-token": token,
+            "Content-Type": "application/json",
+          },
+        };
+      }
     } else {
       requestOptions = {
         method: "POST",

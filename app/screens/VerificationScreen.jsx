@@ -15,6 +15,8 @@ import httpDelegateService from "../services/http-delegate.service";
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
+import Spinner from "react-native-loading-spinner-overlay";
+
 const { height } = Dimensions.get("window");
 const setHeight = (h) => (height / 100) * h;
 
@@ -36,6 +38,7 @@ const VerificationScreen = (props) => {
   const [otp, setOtp] = useState({ 1: "", 2: "", 3: "", 4: "", 5: "", 6: "" });
   const [counter, setCounter] = React.useState(59);
   const [expoPushToken, setExpoPushToken] = useState("");
+  const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
     const timer =
@@ -79,11 +82,12 @@ const VerificationScreen = (props) => {
   const getOtp = () => {
     setCounter(59);
     const body = { email: props.route.params.email };
+    setLoading(true);
     httpDelegateService(
       "https://tradertunnel.herokuapp.com/api/auth/generateOTP",
       body
     ).then((result) => {
-      console.log(result);
+      setLoading(false);
       if (result.status === 200) {
         // props.navigation.navigate("Verification Page", { email: mail });
       } else {
@@ -102,14 +106,16 @@ const VerificationScreen = (props) => {
       otp: otpInput,
       loginType: "otp",
     };
+    setLoading(true);
     httpDelegateService(
       "https://tradertunnel.herokuapp.com/api/auth/validateOTP",
       body
     ).then(async (result) => {
+      setLoading(false);
       if (result?.status === 200) {
         await SecureStore.setItemAsync("token", result.token);
         const bodyToken = {
-          token: "ExponentPushToken[raN5v2DtryvWj661swJpG6]",
+          token: expoPushToken,
           isAvailable: true,
           notificationDisabled: false,
         };
@@ -134,7 +140,6 @@ const VerificationScreen = (props) => {
       } else if (result.status === "fail") {
         Alert.alert("Wrong OTP", "Please try again!");
       } else {
-        console.log(result);
         Alert.alert(
           "Server Overload",
           "Please try after sometime. Our server is currently experiencing heavy load"
@@ -145,6 +150,11 @@ const VerificationScreen = (props) => {
 
   return (
     <View style={styles.container}>
+      <Spinner
+        visible={loading}
+        textContent={"Loading..."}
+        textStyle={styles.spinnerTextStyle}
+      />
       <View style={styles.bigCircle} />
       <View style={styles.smallCircle} />
       <View style={styles.centralizedView}>
@@ -284,6 +294,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+  },
+  spinnerTextStyle: {
+    color: "#FFF",
   },
   bigCircle: {
     width: Dimensions.get("window").height * 0.7,

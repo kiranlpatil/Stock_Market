@@ -10,12 +10,12 @@ import {
   Button,
   TouchableOpacity,
   Dimensions,
+  RefreshControl,
   FlatList,
 } from "react-native";
 const statusBarHeight = Constants.statusBarHeight;
 import { rgbaColor } from "react-native-reanimated/src/reanimated2/Colors";
 import Constants from "expo-constants";
-import faker from "faker";
 import { Caption } from "react-native-paper";
 import LoaderScreen from "./LoaderScreen";
 import { getAPI } from "../services/http-delegate.service";
@@ -25,20 +25,6 @@ const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.8);
 const ITEM_HEIGHT = Math.round((ITEM_WIDTH * 3) / 4);
 const SIZE = Dimensions.get("window").width / 3;
 
-faker.seed(10);
-const DATA = [...Array(30).keys()].map((_, i) => {
-  return {
-    key: faker.random.uuid(),
-    image: `https://randomuser.me/api/portraits/${faker.helpers.randomize([
-      "women",
-      "men",
-    ])}/${faker.random.number(60)}.jpg`,
-    name: faker.name.findName(),
-    jobTitle: faker.name.jobTitle(),
-    email: faker.internet.email(),
-  };
-});
-
 const BG_IMG =
   "https://images.pexels.com/photos/2470655/pexels-photo-2470655.jpeg";
 const SPACING = 20;
@@ -47,15 +33,17 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING * 5;
 
 export default function NotificationScreen() {
   const [notificationData, setNotificationData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadNotifications();
   }, []);
 
   const loadNotifications = () => {
+    setRefreshing(true);
     getAPI("https://tradertunnel.herokuapp.com/api/push-notification").then(
       (result) => {
-        console.log("get gainers");
+        setRefreshing(false);
         if (result.status === 200) {
           setNotificationData(result.data);
         }
@@ -83,6 +71,12 @@ export default function NotificationScreen() {
             padding: SPACING,
             // paddingTop: StatusBar.currentHeight || 42,
           }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => loadNotifications()}
+            />
+          }
           renderItem={({ item, index }) => {
             return (
               <Animated.View

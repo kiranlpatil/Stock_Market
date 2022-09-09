@@ -2,10 +2,10 @@
   "expo": {
     "name": "Traders Tunnel",
     "slug": "stock_market_app",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "userInterfaceStyle": "light",
     "orientation": "portrait",
-    "icon": "./assets/app-logo-tunnel.png",
+    "icon": "./assets/trader-logo-app.png",
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -14,18 +14,26 @@
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 5,
+      "icon": "./assets/trader-logo-app.png",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/trader-logo-app.png",
         "backgroundColor": "#FFFFFF"
       },
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-1789331916266084~2867642897"
+        "googleMobileAdsAppId": "ca-app-pub-1789331916266084~2867642897",
+        "googleSignIn": {
+          "apiKey": "AIzaSyCH8apVLG3BYY7-xnFj_3fWMkbHD9Z0j3c",
+          "certificateHash": "EC2DA12F8EB2E8A6FD20D3409304C37BADF631D5"
+        }
       },
+      "permissions": ["NOTIFICATIONS"],
+      "useNextNotificationsApi": true,
       "package": "com.stocktradder.stockapp"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon.png"
     }
   }
 }

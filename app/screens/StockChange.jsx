@@ -59,6 +59,7 @@ const StockChange = (props) => {
       const body = {
         stockName: stockName,
         stockType: value,
+        dateCreated: new Date().toLocaleString(),
         stockInnerItems: [
           {
             value: targetValue1,

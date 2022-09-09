@@ -43,7 +43,6 @@ export default function IntradayScreen(props) {
   async function loadStockItems() {
     const type = props.route.params.type;
     let link;
-    console.log(type);
     if (type === "Intraday") {
       link =
         "https://tradertunnel.herokuapp.com/api/stock-items/Intraday%20Buy";

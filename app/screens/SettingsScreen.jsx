@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Share,
+  Linking,
   ToastAndroid,
 } from "react-native";
 import { Title, Caption, Text, TouchableRipple } from "react-native-paper";
@@ -12,8 +13,9 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import * as SecureStore from "expo-secure-store";
 import LoaderScreen from "./LoaderScreen";
 import httpDelegateService from "../services/http-delegate.service";
+import { Feather } from "@expo/vector-icons";
 
-const SettingScreen = () => {
+const SettingScreen = (props) => {
   const [userDetials, setUserDetails] = useState(null);
 
   useEffect(() => {
@@ -47,9 +49,7 @@ const SettingScreen = () => {
   const myCustomShare = async () => {
     const shareOptions = {
       title: "Traders Tunnel",
-      message:
-        "Earn money just by uploading images. Become a millionaire. Download it from here: " +
-        "https://play.google.com/store/apps/details?id=com.my11circle1.android",
+      message: "Join Trader Tunnel group to earn more.",
     };
 
     try {
@@ -148,7 +148,12 @@ const SettingScreen = () => {
             </TouchableRipple>
             <TouchableRipple
               onPress={() => {
-                ToastAndroid.show("Coming Soon", ToastAndroid.SHORT);
+                Linking.openURL(`https://rigipay.com/g/iHpaYuLFrK`).then(() => {
+                  Alert.alert(
+                    "Success",
+                    "Your Premium Subscription will be attended very soon"
+                  );
+                });
               }}
             >
               <View style={styles.menuItem}>
@@ -164,11 +169,31 @@ const SettingScreen = () => {
             </TouchableRipple>
             <TouchableRipple
               onPress={() => {
-                ToastAndroid.show("Coming Soon", ToastAndroid.SHORT);
+                props.navigation.navigate("Contact Us");
+              }}
+            >
+              <View style={styles.menuItem}>
+                <AntDesign name="contacts" size={25} color="#FF6347" />
+                <Text style={styles.menuItemText}>Contact Us</Text>
+              </View>
+            </TouchableRipple>
+            <TouchableRipple
+              onPress={() => {
+                props.navigation.navigate("Privacy Policy");
               }}
             >
               <View style={styles.menuItem}>
                 <Icon name="account-check-outline" color="#FF6347" size={25} />
+                <Text style={styles.menuItemText}>Privacy Policy</Text>
+              </View>
+            </TouchableRipple>
+            <TouchableRipple
+              onPress={() => {
+                props.navigation.navigate("Terms And Conditions");
+              }}
+            >
+              <View style={styles.menuItem}>
+                <Feather name="check-square" size={25} color="#FF6347" />
                 <Text style={styles.menuItemText}>Terms And Conditions</Text>
               </View>
             </TouchableRipple>

@@ -8,23 +8,81 @@ import {
 } from "@expo/vector-icons";
 import DashboardScreen from "./DashboardScreen";
 import SettingScreen from "./SettingsScreen";
+import * as TaskManager from "expo-task-manager";
 import ServiceScreen from "./ServiceScreen";
 import UpdatesScreen from "./UpdatesScreen";
 import * as SecureStore from "expo-secure-store";
 import AdminScreen from "./AdminScreen";
+import * as Notifications from "expo-notifications";
 import httpDelegateService, { getAPI } from "../services/http-delegate.service";
-
 const Tab = createMaterialBottomTabNavigator();
 
-function MyTabs() {
+const MyTabs = ({ props }) => {
+  const lastNotificationResponse = Notifications.useLastNotificationResponse();
+  const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
   const [isAdmin, setIsAdmin] = useState(false);
 
+  TaskManager.defineTask(
+    BACKGROUND_NOTIFICATION_TASK,
+    ({ data, error, executionInfo }) => {
+      props.navigation.navigate("Notification");
+    }
+  );
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+    if (Constants.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        alert("Failed to get push token for push notification!");
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
+    return token;
+  }
+
+  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+
   useEffect(() => {
-    getAdminRole().then(
-      (credentials) => setIsAdmin(credentials.isAdmin)
+    getAdminRole().then((credentials) => {
+      setIsAdmin(credentials.isAdmin);
+      console.log(credentials);
+      if (!credentials.token) {
+        registerForPushNotificationsAsync().then((token) => {
+          const body = {
+            email: credentials.email,
+            token: token,
+          };
+          httpDelegateService(
+            "https://tradertunnel.herokuapp.com/api/auth/save-expo-token",
+            body,
+            true
+          ).then(() => console.log("Hi this is triggered"));
+        });
+      }
       // setIsAdmin(true)
-    );
-  }, []);
+    });
+    if (lastNotificationResponse) {
+      props.navigation.navigate("Notification");
+    }
+  });
 
   async function getAdminRole() {
     const result = await getAPI(
@@ -93,8 +151,8 @@ function MyTabs() {
       )}
     </Tab.Navigator>
   );
-}
+};
 
-export default function HomeScreen() {
-  return <MyTabs />;
+export default function HomeScreen(props) {
+  return <MyTabs props={props} />;
 }

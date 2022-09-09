@@ -109,9 +109,9 @@ export default function MarketsScreen() {
                         <Caption></Caption>
                       </Text>
                     </View>
-                    <Caption style={{ paddingTop: 5 }}>
+                    {/* <Caption style={{ paddingTop: 5 }}>
                       {"12:00 Thurday 7, 2021"}
-                    </Caption>
+                    </Caption> */}
                   </View>
                   <View
                     style={{
@@ -222,9 +222,9 @@ export default function MarketsScreen() {
                         <Caption></Caption>
                       </Text>
                     </View>
-                    <Caption style={{ paddingTop: 5 }}>
+                    {/* <Caption style={{ paddingTop: 5 }}>
                       {"12:00 Thurday 7, 2021"}
-                    </Caption>
+                    </Caption> */}
                   </View>
                   <View
                     style={{

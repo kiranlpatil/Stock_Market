@@ -76,16 +76,13 @@ const SplashScreen = (props) => {
     if (network.isConnected) {
       setTimeout(async () => {
         const credentials = await SecureStore.getItemAsync("mail");
-        console.log("value of credentials: ", JSON.parse(credentials));
         if (credentials && JSON.parse(credentials).email) {
-          console.log("home");
           props.navigation.navigate(
             "Home Screen",
             JSON.parse(credentials).isAdmin
           );
         } else {
           props.navigation.navigate("AdCampaign");
-          console.log("campaign");
         }
       }, 300);
     } else {
@@ -94,6 +91,7 @@ const SplashScreen = (props) => {
   };
 
   useEffect(() => {
+    console.log(moveAnim);
     Animated.sequence([
       Animated.timing(moveAnim, {
         duration: 1000,
@@ -120,14 +118,11 @@ const SplashScreen = (props) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
         <Animated.Image
-          style={[styles.image, { opacity: fadeAnim }]}
+          style={[styles.image]}
           source={require("../../assets/tradertunnel-bg.png")}
         />
-        <Animated.View style={[styles.logoContainer, { marginLeft: moveAnim }]}>
-          <Text style={[styles.logoText]}>{"Stock "}</Text>
-          <Animated.Text style={[styles.logoText, { opacity: fadeAnim }]}>
-            Market
-          </Animated.Text>
+        <Animated.View style={[styles.logoContainer]}>
+          <Text style={[styles.logoText]}>{"Stock Market"}</Text>
         </Animated.View>
       </View>
       <View style={styles.container2}>
@@ -144,7 +139,12 @@ const SplashScreen = (props) => {
             {"Slide to Enter ->"}
           </Animated.Text>
           <Animated.View
-            style={[styles.bar, { transform: [{ translateX: translateBtn }] }]}
+            style={[
+              styles.bar,
+              {
+                transform: [{ translateX: translateBtn }],
+              },
+            ]}
             {...panResponder.panHandlers}
           />
         </View>
@@ -174,7 +174,7 @@ export const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: "40%",
+    height: Dimensions.get("window").height / 4,
   },
   logoContainer: {
     flexDirection: "row",

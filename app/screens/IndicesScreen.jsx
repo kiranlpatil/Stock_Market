@@ -103,12 +103,10 @@ export default function IndicesScreen() {
     async function getSaved() {
       getAPI("https://tradertunnel.herokuapp.com/api/nse/indices").then(
         (result) => {
-          console.log("dfdfs");
           if (result.status === 200) {
             setNseData(result.data);
             setLoaderStop(true);
             setNseFetch("true");
-            console.log(nseFetch);
           }
         }
       );
