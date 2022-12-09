@@ -84,7 +84,7 @@ const VerificationScreen = (props) => {
     const body = { email: props.route.params.email };
     setLoading(true);
     httpDelegateService(
-      "https://tradertunnel.herokuapp.com/api/auth/generateOTP",
+      "https://traders-tunnel-info.onrender.com/api/auth/generateOTP",
       body
     ).then((result) => {
       setLoading(false);
@@ -108,7 +108,7 @@ const VerificationScreen = (props) => {
     };
     setLoading(true);
     httpDelegateService(
-      "https://tradertunnel.herokuapp.com/api/auth/validateOTP",
+      "https://traders-tunnel-info.onrender.com/api/auth/validateOTP",
       body
     ).then(async (result) => {
       setLoading(false);
@@ -120,7 +120,7 @@ const VerificationScreen = (props) => {
           notificationDisabled: false,
         };
         httpDelegateService(
-          "https://tradertunnel.herokuapp.com/api/auth/save-token",
+          "https://traders-tunnel-info.onrender.com/api/auth/save-token",
           bodyToken,
           result.token
         ).then(async (token) => {

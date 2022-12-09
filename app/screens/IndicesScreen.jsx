@@ -101,7 +101,7 @@ export default function IndicesScreen() {
     }, []);
 
     async function getSaved() {
-      getAPI("https://tradertunnel.herokuapp.com/api/nse/indices").then(
+      getAPI("https://traders-tunnel-info.onrender.com/api/nse/indices").then(
         (result) => {
           if (result.status === 200) {
             setNseData(result.data);
@@ -164,7 +164,7 @@ export default function IndicesScreen() {
     }, []);
 
     async function getSaved() {
-      getAPI("https://tradertunnel.herokuapp.com/api/bse/indices").then(
+      getAPI("https://traders-tunnel-info.onrender.com/api/bse/indices").then(
         (result) => {
           if (result.status === 200) {
             setBseData(result.data);

@@ -33,7 +33,7 @@ const SettingScreen = (props) => {
   const notificationToggle = () => {
     const body = { notificationDisabled: !userDetials.notificationDisabled };
     httpDelegateService(
-      "https://tradertunnel.herokuapp.com/api/push-notification/notification-disabled",
+      "https://traders-tunnel-info.onrender.com/api/push-notification/notification-disabled",
       body,
       true
     ).then(async (result) => {

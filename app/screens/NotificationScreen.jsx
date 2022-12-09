@@ -41,14 +41,14 @@ export default function NotificationScreen() {
 
   const loadNotifications = () => {
     setRefreshing(true);
-    getAPI("https://tradertunnel.herokuapp.com/api/push-notification").then(
-      (result) => {
-        setRefreshing(false);
-        if (result.status === 200) {
-          setNotificationData(result.data);
-        }
+    getAPI(
+      "https://traders-tunnel-info.onrender.com/api/push-notification"
+    ).then((result) => {
+      setRefreshing(false);
+      if (result.status === 200) {
+        setNotificationData(result.data);
       }
-    );
+    });
   };
 
   const scrollY = React.useRef(new Animated.Value(0)).current;

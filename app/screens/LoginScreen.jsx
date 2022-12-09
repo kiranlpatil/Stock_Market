@@ -55,10 +55,11 @@ export default function LoginScreen(props) {
     setLoading(true);
     const body = { email: mail };
     httpDelegateService(
-      "https://tradertunnel.herokuapp.com/api/auth/generateOTP",
+      "https://traders-tunnel-info.onrender.com/api/auth/generateOTP",
       body,
       true
     ).then((result) => {
+      console.log(result.status);
       setLoading(false);
       if (result.status === 200) {
         props.navigation.navigate("Verification Page", { email: mail });
@@ -92,7 +93,7 @@ export default function LoginScreen(props) {
             loginType: "google",
           };
           httpDelegateService(
-            "https://tradertunnel.herokuapp.com/api/auth/validateOTP",
+            "https://traders-tunnel-info.onrender.com/api/auth/validateOTP",
             body
           ).then(async (result) => {
             if (result?.status === 200) {
@@ -103,7 +104,7 @@ export default function LoginScreen(props) {
                 notificationDisabled: false,
               };
               httpDelegateService(
-                "https://tradertunnel.herokuapp.com/api/auth/save-token",
+                "https://traders-tunnel-info.onrender.com/api/auth/save-token",
                 bodyToken,
                 result.token
               ).then(async (token) => {
@@ -175,7 +176,7 @@ export default function LoginScreen(props) {
       loginType: "google",
     };
     httpDelegateService(
-      "https://tradertunnel.herokuapp.com/api/auth/validateOTP",
+      "https://traders-tunnel-info.onrender.com/api/auth/validateOTP",
       body
     ).then(async (result) => {
       if (result?.status === 200) {
@@ -186,7 +187,7 @@ export default function LoginScreen(props) {
           notificationDisabled: false,
         };
         httpDelegateService(
-          "https://tradertunnel.herokuapp.com/api/auth/save-token",
+          "https://traders-tunnel-info.onrender.com/api/auth/save-token",
           bodyToken,
           result.token
         ).then(async (token) => {

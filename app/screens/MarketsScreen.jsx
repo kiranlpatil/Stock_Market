@@ -35,7 +35,7 @@ export default function MarketsScreen() {
   }, []);
 
   const loadGainersData = () => {
-    getAPI("https://tradertunnel.herokuapp.com/api/nse/gainers").then(
+    getAPI("https://traders-tunnel-info.onrender.com/api/nse/gainers").then(
       (result) => {
         if (result.status === 200) {
           setGainers(result.data);
@@ -45,7 +45,7 @@ export default function MarketsScreen() {
   };
 
   const loadLoosersData = () => {
-    getAPI("https://tradertunnel.herokuapp.com/api/nse/losers").then(
+    getAPI("https://traders-tunnel-info.onrender.com/api/nse/losers").then(
       (result) => {
         if (result.status === 200) {
           setLoosers(result.data);

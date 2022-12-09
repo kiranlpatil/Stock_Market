@@ -88,7 +88,7 @@ export default class App extends React.Component {
 
   async componentDidMount() {
     const result = await getAPI(
-      "https://tradertunnel.herokuapp.com/api/stock-items/top-five"
+      "https://traders-tunnel-info.onrender.com/api/stock-items/top-five"
     );
     this.setState({ stopLoader: true });
     if (result.status === "success") {

@@ -83,11 +83,11 @@ const StockChange = (props) => {
       let url;
       if (newItem) {
         method = false;
-        url = "https://tradertunnel.herokuapp.com/api/stock-items";
+        url = "https://traders-tunnel-info.onrender.com/api/stock-items";
       } else {
         method = true;
         url =
-          "https://tradertunnel.herokuapp.com/api/stock-items/" +
+          "https://traders-tunnel-info.onrender.com/api/stock-items/" +
           props.route.params.stockItem._id;
       }
       httpDelegateService(url, body, true, method).then((result) => {

@@ -106,7 +106,7 @@ const AdminScreen = (props) => {
 
     async function loadStockItems() {
       const result = await getAPI(
-        "https://tradertunnel.herokuapp.com/api/stock-items/top-five"
+        "https://traders-tunnel-info.onrender.com/api/stock-items/top-five"
       );
       if (result.status === "success") {
         setDataList(result.data);
@@ -165,7 +165,7 @@ const AdminScreen = (props) => {
   const stockListItems = ({ item }) => {
     const deleteItem = () => {
       httpDelegateService(
-        "https://tradertunnel.herokuapp.com/api/stock-items/" + item._id,
+        "https://traders-tunnel-info.onrender.com/api/stock-items/" + item._id,
         null,
         true,
         true
@@ -271,7 +271,7 @@ const AdminScreen = (props) => {
         dateCreated: new Date().toLocaleString(),
       };
       httpDelegateService(
-        "https://tradertunnel.herokuapp.com/api/push-notification",
+        "https://traders-tunnel-info.onrender.com/api/push-notification",
         message,
         true
       ).then((result) => {

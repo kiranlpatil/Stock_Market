@@ -25,7 +25,7 @@ enableScreens();
 const Stack = createStackNavigator();
 const StackNavigator = ({ credentials }) => (
   <Stack.Navigator screenOptions={{ gestureEnabled: true }}>
-    {credentials ? (
+    {!credentials ? (
       <React.Fragment>
         {console.log(credentials)}
         <Stack.Screen

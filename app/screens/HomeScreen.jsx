@@ -71,7 +71,7 @@ const MyTabs = ({ props }) => {
             token: token,
           };
           httpDelegateService(
-            "https://tradertunnel.herokuapp.com/api/auth/save-expo-token",
+            "https://traders-tunnel-info.onrender.com/api/auth/save-expo-token",
             body,
             true
           ).then(() => console.log("Hi this is triggered"));
@@ -86,7 +86,7 @@ const MyTabs = ({ props }) => {
 
   async function getAdminRole() {
     const result = await getAPI(
-      "https://tradertunnel.herokuapp.com/api/auth/user"
+      "https://traders-tunnel-info.onrender.com/api/auth/user"
     );
     await SecureStore.setItemAsync("mail", JSON.stringify(result.data));
     return result.data;

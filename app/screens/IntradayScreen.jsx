@@ -45,10 +45,10 @@ export default function IntradayScreen(props) {
     let link;
     if (type === "Intraday") {
       link =
-        "https://tradertunnel.herokuapp.com/api/stock-items/Intraday%20Buy";
+        "https://traders-tunnel-info.onrender.com/api/stock-items/Intraday%20Buy";
     } else {
       link =
-        "https://tradertunnel.herokuapp.com/api/stock-items/Delivery%20Buy";
+        "https://traders-tunnel-info.onrender.com/api/stock-items/Delivery%20Buy";
     }
     const result = await getAPI(link);
     if (result.status === "success") {
